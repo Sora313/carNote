@@ -1,7 +1,0 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ExpenseModel = exports.CarModel = exports.UserModel = void 0;
-const mongoose_1 = require("mongoose");
-exports.UserModel = (0, mongoose_1.model)("User", new mongoose_1.Schema({ name: { type: String, required: true, trim: true }, email: { type: String, required: true, unique: true, lowercase: true, trim: true }, passwordHash: String, googleId: String }, { timestamps: true }));
-exports.CarModel = (0, mongoose_1.model)("Car", new mongoose_1.Schema({ name: { type: String, required: true }, plate: { type: String, required: true, uppercase: true }, model: { type: String, required: true }, ownerId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true } }, { timestamps: true }));
-exports.ExpenseModel = (0, mongoose_1.model)("Expense", new mongoose_1.Schema({ name: { type: String, required: true }, type: { type: String, required: true }, amount: { type: Number, required: true, min: 0 }, frequency: { type: String, enum: ["Una vez", "Semanal", "Mensual", "Anual", "Cada 6 meses"], required: true }, carId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Car", required: true }, ownerId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true }, date: { type: Date, default: Date.now }, status: { type: String, enum: ["Pagado", "Pendiente"], default: "Pendiente" } }, { timestamps: true }));
