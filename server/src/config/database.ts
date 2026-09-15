@@ -9,6 +9,20 @@ export async function connectDatabase(uri = process.env.MONGODB_URI ?? defaultMo
   });
 }
 
+// En serverless (Vercel) el módulo puede quedar "tibio" entre invocaciones:
+// cachear la promesa evita reconectar en cada request y reintenta si la última conexión falló.
+let connectionPromise: Promise<void> | null = null;
+
+export function ensureDatabaseConnection() {
+  if (!connectionPromise) {
+    connectionPromise = connectDatabase().catch((error) => {
+      connectionPromise = null;
+      throw error;
+    });
+  }
+  return connectionPromise;
+}
+
 export function isDatabaseReady() {
   return mongoose.connection.readyState === 1;
 }
