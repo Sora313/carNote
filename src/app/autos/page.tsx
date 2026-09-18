@@ -1,18 +1,201 @@
 "use client";
 
 import { Pencil, Plus, Search, Trash2, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { carsApi, type Car } from "@/lib/api";
+import { useState } from "react";
+import type { Car } from "@/models";
+import { useApp } from "@/context/app-context";
 import { ProtectedShell } from "@/components/protected-shell";
 
 const emptyCar = { name: "", plate: "", model: "" };
 export default function AutosPage() {
-  const [cars, setCars] = useState<Car[]>([]); const [query, setQuery] = useState(""); const [form, setForm] = useState(emptyCar); const [editing, setEditing] = useState<Car | null>(null); const [open, setOpen] = useState(false); const [error, setError] = useState("");
-  async function loadCars() { try { setCars(await carsApi.list()); } catch (cause) { setError(cause instanceof Error ? cause.message : "No se pudieron cargar los autos"); } }
-  useEffect(() => { let active = true; carsApi.list().then((data) => { if (active) setCars(data); }).catch((cause: unknown) => { if (active) setError(cause instanceof Error ? cause.message : "No se pudieron cargar los autos"); }); return () => { active = false; }; }, []);
-  const filtered = cars.filter((car) => `${car.name} ${car.plate} ${car.model}`.toLowerCase().includes(query.toLowerCase()));
-  function startEdit(car: Car) { setEditing(car); setForm({ name: car.name, plate: car.plate, model: car.model }); setOpen(true); }
-  async function submit(event: React.FormEvent) { event.preventDefault(); try { if (editing) await carsApi.update(editing._id, form); else await carsApi.create(form); setOpen(false); setEditing(null); setForm(emptyCar); await loadCars(); } catch (cause) { setError(cause instanceof Error ? cause.message : "No se pudo guardar el auto"); } }
-  async function remove(id: string) { if (!window.confirm("¿Eliminar este auto?")) return; try { await carsApi.remove(id); setCars(cars.filter((car) => car._id !== id)); } catch (cause) { setError(cause instanceof Error ? cause.message : "No se pudo eliminar el auto"); } }
-  return <ProtectedShell title="Mis autos"><div className="page-content"><div className="page-heading"><div><p className="eyebrow">FLOTA</p><h1>Mis autos</h1><p className="subtitle">Administra los vehículos asociados a tu cuenta.</p></div><button className="primary-button" onClick={() => { setEditing(null); setForm(emptyCar); setOpen(true); }}><Plus size={18} /> Nuevo auto</button></div><section className="panel crud-panel"><div className="crud-toolbar"><div><h2>Autos registrados</h2><p>{cars.length} vehículos en tu flota</p></div><div className="search-box"><Search size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar auto..." /></div></div>{error && <p className="error-message">{error}</p>}<div className="table-wrap"><table><thead><tr><th>NOMBRE</th><th>PLACA</th><th>MODELO</th><th>ACCIONES</th></tr></thead><tbody>{filtered.map((car) => <tr key={car._id}><td><strong>{car.name}</strong></td><td>{car.plate}</td><td>{car.model}</td><td><div className="row-actions"><button className="action-button" onClick={() => startEdit(car)} aria-label="Editar"><Pencil size={15} /></button><button className="action-button danger" onClick={() => void remove(car._id)} aria-label="Eliminar"><Trash2 size={15} /></button></div></td></tr>)}</tbody></table></div>{!filtered.length && <div className="empty-crud">Aún no hay autos para mostrar.</div>}</section></div>{open && <div className="modal-backdrop" onMouseDown={() => setOpen(false)}><div className="modal" onMouseDown={(event) => event.stopPropagation()}><div className="modal-header"><div><p className="eyebrow">CRUD DE AUTOS</p><h2>{editing ? "Editar auto" : "Nuevo auto"}</h2></div><button className="close-button" onClick={() => setOpen(false)}><X size={19} /></button></div><form onSubmit={submit}><label>Nombre<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Mazda CX-5" required /></label><label>Placa<input value={form.plate} onChange={(event) => setForm({ ...form, plate: event.target.value })} placeholder="ABC-1234" required /></label><label>Modelo<input value={form.model} onChange={(event) => setForm({ ...form, model: event.target.value })} placeholder="2022" required /></label><div className="modal-actions"><button type="button" className="secondary-button" onClick={() => setOpen(false)}>Cancelar</button><button className="primary-button">Guardar auto</button></div></form></div></div>}</ProtectedShell>;
+  // Ruta /autos: ProtectedShell valida sesión; el contexto dirige el CRUD a /cars.
+  const { cars, createCar, updateCar, removeCar } = useApp();
+  const [query, setQuery] = useState("");
+  const [form, setForm] = useState(emptyCar);
+  const [editing, setEditing] = useState<Car | null>(null);
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState("");
+  const filtered = cars.filter((car) =>
+    `${car.name} ${car.plate} ${car.model}`
+      .toLowerCase()
+      .includes(query.toLowerCase()),
+  );
+  function startEdit(car: Car) {
+    setEditing(car);
+    setForm({ name: car.name, plate: car.plate, model: car.model });
+    setOpen(true);
+  }
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    try {
+      if (editing) await updateCar(editing._id, form);
+      else await createCar(form);
+      setOpen(false);
+      setEditing(null);
+      setForm(emptyCar);
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "No se pudo guardar el auto",
+      );
+    }
+  }
+  async function remove(id: string) {
+    if (!window.confirm("¿Eliminar este auto?")) return;
+    try {
+      await removeCar(id);
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "No se pudo eliminar el auto",
+      );
+    }
+  }
+  return (
+    <ProtectedShell title="Mis autos">
+      <div className="page-content">
+        <div className="page-heading">
+          <div>
+            <p className="eyebrow">FLOTA</p>
+            <h1>Mis autos</h1>
+            <p className="subtitle">
+              Administra los vehículos asociados a tu cuenta.
+            </p>
+          </div>
+          <button
+            className="primary-button"
+            onClick={() => {
+              setEditing(null);
+              setForm(emptyCar);
+              setOpen(true);
+            }}
+          >
+            <Plus size={18} /> Nuevo auto
+          </button>
+        </div>
+        <section className="panel crud-panel">
+          <div className="crud-toolbar">
+            <div>
+              <h2>Autos registrados2</h2>
+              <p>{cars.length} vehículos en tu flota</p>
+            </div>
+            <div className="search-box">
+              <Search size={16} />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Buscar auto..."
+              />
+            </div>
+          </div>
+          {error && <p className="error-message">{error}</p>}
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>NOMBRE</th>
+                  <th>PLACA</th>
+                  <th>MODELO</th>
+                  <th>ACCIONES</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((car) => (
+                  <tr key={car._id}>
+                    <td>
+                      <strong>{car.name}</strong>
+                    </td>
+                    <td>{car.plate}</td>
+                    <td>{car.model}</td>
+                    <td>
+                      <div className="row-actions">
+                        <button
+                          className="action-button"
+                          onClick={() => startEdit(car)}
+                          aria-label="Editar"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                        <button
+                          className="action-button danger"
+                          onClick={() => void remove(car._id)}
+                          aria-label="Eliminar"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {!filtered.length && (
+            <div className="empty-crud">Aún no hay autos para mostrar.</div>
+          )}
+        </section>
+      </div>
+      {open && (
+        <div className="modal-backdrop" onMouseDown={() => setOpen(false)}>
+          <div
+            className="modal"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div>
+                <p className="eyebrow">CRUD DE AUTOS</p>
+                <h2>{editing ? "Editar auto" : "Nuevo auto"}</h2>
+              </div>
+              <button className="close-button" onClick={() => setOpen(false)}>
+                <X size={19} />
+              </button>
+            </div>
+            <form onSubmit={submit}>
+              <label>
+                Nombre
+                <input
+                  value={form.name}
+                  onChange={(event) =>
+                    setForm({ ...form, name: event.target.value })
+                  }
+                  placeholder="Mazda CX-5"
+                  required
+                />
+              </label>
+              <label>
+                Placa
+                <input
+                  value={form.plate}
+                  onChange={(event) =>
+                    setForm({ ...form, plate: event.target.value })
+                  }
+                  placeholder="ABC-1234"
+                  required
+                />
+              </label>
+              <label>
+                Modelo
+                <input
+                  value={form.model}
+                  onChange={(event) =>
+                    setForm({ ...form, model: event.target.value })
+                  }
+                  placeholder="2022"
+                  required
+                />
+              </label>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => setOpen(false)}
+                >
+                  Cancelar
+                </button>
+                <button className="primary-button">Guardar auto</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </ProtectedShell>
+  );
 }

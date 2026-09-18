@@ -5,5 +5,106 @@ import { ArrowUpRight, Car, FileText, Plus, Wallet } from "lucide-react";
 import { ProtectedShell } from "@/components/protected-shell";
 
 export default function Home() {
-  return <ProtectedShell title="Resumen"><div className="page-content"><div className="page-heading"><div><p className="eyebrow">RESUMEN MENSUAL</p><h1>Tu flota, bajo control</h1><p className="subtitle">Consulta el estado de tus autos y gastos desde un solo lugar.</p></div><Link className="primary-button" href="/gastos"><Plus size={18} /> Registrar gasto</Link></div><div className="stat-grid"><article className="stat-card accent-card"><div className="stat-heading"><span>GASTO TOTAL DEL MES</span><span className="trend up">↗ 8.4%</span></div><strong className="stat-value">$1,248.50</strong><div className="stat-foot">vs. $1,150.20 el mes pasado</div></article><article className="stat-card"><div className="stat-heading"><span>PROMEDIO DIARIO</span><span className="trend down">↘ 3.1%</span></div><strong className="stat-value">$41.62</strong><div className="stat-foot">Dentro de tu presupuesto</div></article><article className="stat-card"><div className="stat-heading"><span>AUTOS ACTIVOS</span><span className="stat-icon"><Car size={16} /></span></div><strong className="stat-value">3 <small>/ 3</small></strong><div className="stat-foot">Todos al día</div></article></div><div className="quick-grid"><Link href="/autos" className="quick-card"><span className="quick-icon blue"><Car size={22} /></span><span><strong>Gestionar autos</strong><small>Administra placas y modelos</small></span><ArrowUpRight size={18} /></Link><Link href="/gastos" className="quick-card"><span className="quick-icon green"><Wallet size={22} /></span><span><strong>Registrar gastos</strong><small>Consulta y edita movimientos</small></span><ArrowUpRight size={18} /></Link><Link href="/reportes" className="quick-card"><span className="quick-icon orange"><FileText size={22} /></span><span><strong>Ver reportes</strong><small>Analiza el gasto mensual</small></span><ArrowUpRight size={18} /></Link></div><section className="panel summary-panel"><div className="panel-header"><div><h2>Actividad reciente</h2><p>Tu espacio está listo para comenzar.</p></div><Link className="text-button" href="/gastos">Ver gastos <span>→</span></Link></div><div className="summary-empty"><Wallet size={28} /><p>Registra tu primer gasto para ver aquí el comportamiento de tu flota.</p><Link className="primary-button" href="/gastos">Crear registro</Link></div></section></div></ProtectedShell>;
+  // Ruta /: entra por ProtectedShell y desde aquí salen los accesos a los CRUD.
+  return (
+    <ProtectedShell title="Resumen">
+      <div className="page-content">
+        <div className="page-heading">
+          <div>
+            <p className="eyebrow">RESUMEN MENSUAL</p>
+            <h1>Tu flota, bajo control</h1>
+            <p className="subtitle">
+              Consulta el estado de tus autos y gastos desde un solo lugar.
+            </p>
+          </div>
+          <Link className="primary-button" href="/gastos">
+            <Plus size={18} /> Registrar gasto
+          </Link>
+        </div>
+        <div className="stat-grid">
+          <article className="stat-card accent-card">
+            <div className="stat-heading">
+              <span>GASTO TOTAL DEL MES</span>
+              <span className="trend up">↗ 8.4%</span>
+            </div>
+            <strong className="stat-value">$1,248.50</strong>
+            <div className="stat-foot">vs. $1,150.20 el mes pasado</div>
+          </article>
+          <article className="stat-card">
+            <div className="stat-heading">
+              <span>PROMEDIO DIARIO</span>
+              <span className="trend down">↘ 3.1%</span>
+            </div>
+            <strong className="stat-value">$41.62</strong>
+            <div className="stat-foot">Dentro de tu presupuesto</div>
+          </article>
+          <article className="stat-card">
+            <div className="stat-heading">
+              <span>AUTOS ACTIVOS</span>
+              <span className="stat-icon">
+                <Car size={16} />
+              </span>
+            </div>
+            <strong className="stat-value">
+              3 <small>/ 3</small>
+            </strong>
+            <div className="stat-foot">Todos al día</div>
+          </article>
+        </div>
+        <div className="quick-grid">
+          <Link href="/autos" className="quick-card">
+            <span className="quick-icon blue">
+              <Car size={22} />
+            </span>
+            <span>
+              <strong>Gestionar autos</strong>
+              <small>Administra placas y modelos</small>
+            </span>
+            <ArrowUpRight size={18} />
+          </Link>
+          <Link href="/gastos" className="quick-card">
+            <span className="quick-icon green">
+              <Wallet size={22} />
+            </span>
+            <span>
+              <strong>Registrar gastos</strong>
+              <small>Consulta y edita movimientos</small>
+            </span>
+            <ArrowUpRight size={18} />
+          </Link>
+          <Link href="/reportes" className="quick-card">
+            <span className="quick-icon orange">
+              <FileText size={22} />
+            </span>
+            <span>
+              <strong>Ver reportes</strong>
+              <small>Analiza el gasto mensual</small>
+            </span>
+            <ArrowUpRight size={18} />
+          </Link>
+        </div>
+        <section className="panel summary-panel">
+          <div className="panel-header">
+            <div>
+              <h2>Actividad reciente</h2>
+              <p>Tu espacio está listo para comenzar.</p>
+            </div>
+            <Link className="text-button" href="/gastos">
+              Ver gastos <span>→</span>
+            </Link>
+          </div>
+          <div className="summary-empty">
+            <Wallet size={28} />
+            <p>
+              Registra tu primer gasto para ver aquí el comportamiento de tu
+              flota.
+            </p>
+            <Link className="primary-button" href="/gastos">
+              Crear registro
+            </Link>
+          </div>
+        </section>
+      </div>
+    </ProtectedShell>
+  );
 }

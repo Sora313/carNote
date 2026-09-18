@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AppProvider } from "@/context/app-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,12 +19,16 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  // Entrada global de la app: Next renderiza este layout antes de cualquier ruta.
   return (
     <html
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {/* Desde aquí todas las páginas reciben sesión y estado CRUD compartidos. */}
+        <AppProvider>{children}</AppProvider>
+      </body>
     </html>
   );
 }
