@@ -4,7 +4,15 @@ import { ensureDatabaseConnection } from "./config/database.js";
 import routes from "./routes.js";
 
 const app = express();
-app.use(cors({ origin: process.env.FRONTEND_URL ?? "http://localhost:3000" }));
+const allowedOrigins = new Set([
+  "http://localhost:3000",
+  "https://car-note.vercel.app",
+  "https://car-note-git-main-shiro-project.vercel.app",
+]);
+if (process.env.FRONTEND_URL) {
+  for (const origin of process.env.FRONTEND_URL.split(",")) allowedOrigins.add(origin.trim());
+}
+app.use(cors({ origin: [...allowedOrigins] }));
 app.use(express.json());
 app.use(async (_request, response, next) => {
   try {
